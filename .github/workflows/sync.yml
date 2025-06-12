@@ -1,0 +1,41 @@
+name: sync
+
+on:
+  schedule:
+    # Every day at 14:12 (randomly chosen)
+    - cron: '12 14 * * *'
+
+  # Allows manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    name: sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+      - name: Fetch source
+        uses: actions/checkout@v4
+      - name: Run script
+        run: scripts/sync.sh Infinisil-s-Test-Organization noteam members
+        # run: scripts/sync.sh NixOS nixpkgs-committers members
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          commit-message: Sync of manual change
+          branch: create-pull-request/sync
+          title: Sync of manual change
+          body: This is an automated PR to sync the member list in this repository to match the GitHub team members.
+          team-reviewers: test
+          # team-reviewers: commit-bit-delegation
+
