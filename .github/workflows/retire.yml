@@ -1,0 +1,40 @@
+name: retire
+
+on:
+  schedule:
+    # Every day at 17:07 (randomly chosen)
+    - cron: '7 17 * * *'
+
+  # Allows manual trigger
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  retire:
+    name: retire
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+      - name: Get GitHub App User Git String
+        id: user
+        run: |
+          userId=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)
+          name="${{ steps.app-token.outputs.app-slug }}[bot]"
+          email="$userId+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git config --global user.name "$name"
+          git config --global user.email "$email"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+      - run: |
+      - name: Fetch source
+        uses: actions/checkout@v4
+      - name: Run script
+        run: scripts/retire.sh Infinisil-s-Test-Organization nixpkgs nixpkgs-committers members
+        # run: scripts/sync.sh NixOS nixpkgs nixpkgs-committers members
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
