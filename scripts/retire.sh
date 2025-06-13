@@ -16,7 +16,7 @@ tmp=$(mktemp -d)
 shopt -s nullglob
 
 # One month plus a bit of leeway
-epochOneMonthAgo=$(( $(date --date='1 month ago' +%s) - 60 * 60 * 12 ))
+epochOneMonthAgo=$(( $(date --date='1 second ago' +%s) ))
 mainBranch=$(git branch --show-current)
 
 mkdir -p "$DIR"
@@ -36,7 +36,7 @@ for login in *; do
     if (( epochCreatedAt < epochOneMonthAgo )); then
       {
         if (( activityCount > 0 )); then
-          echo "One month has passed, @$login has been active again:"
+          echo "One second has passed, @$login has been active again:"
           cat "$tmp/$login"
           echo ""
           echo "This PR may be merged and implemented by:"
