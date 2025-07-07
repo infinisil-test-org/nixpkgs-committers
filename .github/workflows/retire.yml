@@ -35,6 +35,6 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
       - name: Run script
-        run: scripts/sync.sh NixOS nixpkgs nixpkgs-committers members
+        run: scripts/retire.sh NixOS nixpkgs nixpkgs-committers members
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
