@@ -45,7 +45,18 @@ for login in *; do
           echo "One month has passed, to this PR should now be merged and implemented by:"
         fi
         echo "- Adding @$login to the [Retired Nixpkgs Contributors team](https://github.com/orgs/NixOS/teams/retired-nixpkgs-contributors)"
+        echo '  ```sh'
+        echo '  gh api \'
+        echo '    --method PUT \'
+        echo "    '/orgs/NixOS/teams/retired-nixpkgs-contributors/memberships/$login' \\"
+        echo '    -f role=member'
+        echo '  ```'
         echo "- Removing @$login from the [Nixpkgs Committers team](https://github.com/orgs/NixOS/teams/nixpkgs-committers)"
+        echo '  ```sh'
+        echo '  gh api \'
+        echo '    --method DELETE \'
+        echo "    '/orgs/NixOS/teams/nixpkgs-committers/memberships/$login'"
+        echo '  ```'
       } | gh api --method POST /repos/"$ORG"/"$MEMBER_REPO"/issues/"$prNumber"/comments -F "body=@-" >/dev/null
     else
       echo "$login has a retirement PR pending"
