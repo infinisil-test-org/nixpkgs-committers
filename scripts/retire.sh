@@ -1,8 +1,32 @@
 #!/usr/bin/env bash
 set -euo pipefail
+shopt -s nullglob
+
+log() {
+  echo "$@" >&2
+}
+
+trace() {
+  log "Running:" "${@@Q}"
+  "$@"
+}
+
+effect() {
+  log -en "\e[33m"
+  if [[ -z "${PROD:-}" ]]; then
+    log "Skipping effect:" "${@@Q}"
+    # If there's stdin, show it
+    if read -t 0 _; then
+      sed "s/^/[stdin] /" >&2
+    fi
+  else
+    trace "$@"
+  fi
+  log -en "\e[0m"
+}
 
 usage() {
-  echo >&2 "Usage: $0 ORG ACTIVITY_REPO MEMBER_REPO DIR"
+  log "Usage: $0 ORG ACTIVITY_REPO MEMBER_REPO DIR PR_CUTOFF_DATE"
   exit 1
 }
 
@@ -10,31 +34,37 @@ ORG=${1:-$(usage)}
 ACTIVITY_REPO=${2:-$(usage)}
 MEMBER_REPO=${3:-$(usage)}
 DIR=${4:-$(usage)}
+CUTOFF_DATE=${5:-$(usage)}
 
-tmp=$(mktemp -d)
-
-shopt -s nullglob
-
-# One month plus a bit of leeway
-epochOneMonthAgo=$(( $(date --date='1 month ago' +%s) - 60 * 60 * 12 ))
 mainBranch=$(git branch --show-current)
+cutoffEpoch=$(date --date="$CUTOFF_DATE" +%s)
+
+if [[ -z "${PROD:-}" ]]; then
+  tmp=$(git rev-parse --show-toplevel)/.tmp
+  rm -rf "$tmp"
+  mkdir "$tmp"
+  log -e "\e[33mPROD=1 is not set, skipping effects and keeping temporary files in $tmp until the next run\e[0m"
+else
+  tmp=$(mktemp -d)
+  trap 'rm -rf "$tmp"' exit
+fi
 
 mkdir -p "$DIR"
 cd "$DIR"
 for login in *; do
-  gh api -X GET /repos/"$ORG"/"$ACTIVITY_REPO"/activity -f time_period=year -f actor="$login" -f per_page=100 \
+  trace gh api -X GET /repos/"$ORG"/"$ACTIVITY_REPO"/activity -f time_period=year -f actor="$login" -f per_page=100 \
     --jq ".[] | \"- \(.timestamp) [\(.activity_type) on \(.ref | ltrimstr(\"refs/heads/\"))](https://github.com/$ORG/$ACTIVITY_REPO/compare/\(.before)...\(.after))\"" \
     > "$tmp/$login"
   activityCount=$(wc -l <"$tmp/$login")
 
   branchName=retire-$login
-  prInfo=$(gh api -X GET /repos/"$ORG"/"$MEMBER_REPO"/pulls -f head="$ORG":"$branchName" --jq '.[0]')
+  prInfo=$(trace gh api -X GET /repos/"$ORG"/"$MEMBER_REPO"/pulls -f head="$ORG":"$branchName" --jq '.[0]')
   if [[ -n "$prInfo" ]]; then
     # If there is a PR already
     prNumber=$(jq .number <<< "$prInfo")
     epochCreatedAt=$(date --date="$(jq -r .created_at <<< "$prInfo")" +%s)
-    if (( epochCreatedAt < epochOneMonthAgo )); then
-      echo "$login has a retirement PR due, comment with a reminder to merge"
+    if (( epochCreatedAt < cutoffEpoch )); then
+      log "$login has a retirement PR due, commenting with next steps"
       {
         if (( activityCount > 0 )); then
           echo "One month has passed, @$login has been active again:"
@@ -57,30 +87,33 @@ for login in *; do
         echo '    --method DELETE \'
         echo "    '/orgs/NixOS/teams/nixpkgs-committers/memberships/$login'"
         echo '  ```'
-      } | gh api --method POST /repos/"$ORG"/"$MEMBER_REPO"/issues/"$prNumber"/comments -F "body=@-" >/dev/null
+      } | effect gh api --method POST /repos/"$ORG"/"$MEMBER_REPO"/issues/"$prNumber"/comments -F "body=@-" >/dev/null
     else
-      echo "$login has a retirement PR pending"
+      log "$login has a retirement PR pending"
     fi
   elif (( activityCount <= 0 )); then
-    echo "$login has become inactive, opening a PR"
+    log "$login has become inactive, opening a PR"
     # If there is no PR yet, but they have become inactive
-    git switch -C "$branchName"
-    git rm "$login"
-    git commit -m "Automatic retirement of @$login"
-    git push -f origin "$branchName"
-    {
-      echo "This is an automated PR to retire @$login as a Nixpkgs committers due to not using their commit access for 1 year."
-      echo ""
-      echo "Make a comment with your motivation to keep commit access, otherwise this PR will be merged and implemented in 1 month."
-    } | gh api \
-      --method POST \
-      /repos/"$ORG"/"$MEMBER_REPO"/pulls \
-       -f "title=Automatic retirement of @$login" \
-       -F "body=@-" \
-       -f "head=$ORG:$branchName" \
-       -f "base=$mainBranch" >/dev/null
-    git checkout "$mainBranch"
+    (
+      trace git switch -C "$branchName"
+      trap 'trace git checkout "$mainBranch" && trace git branch -D "$branchName"' exit
+      trace git rm "$login"
+      trace git commit -m "Automatic retirement of @$login"
+      effect git push -f -u git@github.com:"$ORG"/"$MEMBER_REPO" "$branchName"
+      {
+        echo "This is an automated PR to retire @$login as a Nixpkgs committers due to not using their commit access for 1 year."
+        echo ""
+        echo "Make a comment with your motivation to keep commit access, otherwise this PR will be merged and implemented in 1 month."
+      } | effect gh api \
+        --method POST \
+        /repos/"$ORG"/"$MEMBER_REPO"/pulls \
+         -f "title=Automatic retirement of @$login" \
+         -F "body=@-" \
+         -f "head=$ORG:$branchName" \
+         -f "base=$mainBranch" >/dev/null
+    )
   else
-    echo "$login is active with $activityCount activities"
+    log "$login is active with $activityCount activities"
   fi
+  log ""
 done
