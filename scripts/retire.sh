@@ -83,7 +83,7 @@ for login in *; do
           echo "One month has passed, @$login has been active again:"
           cat "$tmp/$login"
           echo ""
-          echo "This PR may be merged and implemented by:"
+          echo "If still appropriate, this PR may be merged and implemented by:"
         else
           echo "One month has passed, to this PR should now be merged and implemented by:"
         fi
