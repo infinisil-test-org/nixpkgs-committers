@@ -35,6 +35,8 @@ jobs:
         with:
           token: ${{ steps.app-token.outputs.token }}
       - name: Run script
-        run: scripts/retire.sh NixOS nixpkgs nixpkgs-committers members
+        # One month plus a bit of leeway
+        run: scripts/retire.sh NixOS nixpkgs nixpkgs-committers members "yesterday 1 month ago"
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PROD: "1"
