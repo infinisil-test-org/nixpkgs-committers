@@ -75,8 +75,9 @@ for login in *; do
     # If there is a PR already
     prNumber=$(jq .number <<< "$prInfo")
     epochCreatedAt=$(date --date="$(jq -r .created_at <<< "$prInfo")" +%s)
-    if (( epochCreatedAt < cutoffEpoch )); then
-      log "$login has a retirement PR due, commenting with next steps"
+    if jq -e .draft <<< "$prInfo" >/dev/null && (( epochCreatedAt < cutoffEpoch )); then
+      log "$login has a retirement PR due, unmarking PR as draft and commenting with next steps"
+      effect gh pr ready --repo "$ORG/$MEMBER_REPO" "$prNumber"
       {
         if (( activityCount > 0 )); then
           echo "One month has passed, @$login has been active again:"
@@ -122,7 +123,8 @@ for login in *; do
          -f "title=Automatic retirement of @$login" \
          -F "body=@-" \
          -f "head=$ORG:$branchName" \
-         -f "base=$mainBranch" >/dev/null
+         -f "base=$mainBranch" \
+         -F "draft=true" >/dev/null
     )
   else
     log "$login is active with $activityCount activities"
