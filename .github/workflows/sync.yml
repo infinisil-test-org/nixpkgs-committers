@@ -47,5 +47,4 @@ jobs:
           branch: create-pull-request/sync
           title: Automated sync
           body: This is an automated PR to sync the member list in this repository to match the GitHub team members. This PR can be merged without taking any further action.
-          team-reviewers: commit-bit-delegation
 
