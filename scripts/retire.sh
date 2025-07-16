@@ -52,8 +52,20 @@ fi
 mkdir -p "$DIR"
 cd "$DIR"
 for login in *; do
-  trace gh api -X GET /repos/"$ORG"/"$ACTIVITY_REPO"/activity -f time_period=year -f actor="$login" -f per_page=100 \
-    --jq ".[] | \"- \(.timestamp) [\(.activity_type) on \(.ref | ltrimstr(\"refs/heads/\"))](https://github.com/$ORG/$ACTIVITY_REPO/compare/\(.before)...\(.after))\"" \
+  trace gh api -X GET /repos/"$ORG"/"$ACTIVITY_REPO"/activity \
+    -f time_period=year \
+    -f actor="$login" \
+    -f per_page=100 \
+    --jq '.[] |
+      "- \(.timestamp) [\(.activity_type) on \(.ref | ltrimstr("refs/heads/"))](https://github.com/'"$ORG/$ACTIVITY_REPO"'/\(
+        if .activity_type == "branch_creation" then
+          "commit/\(.after)"
+        elif .activity_type == "branch_deletion" then
+          "commit/\(.before)"
+        else
+          "compare/\(.before)...\(.after)"
+        end
+      ))"' \
     > "$tmp/$login"
   activityCount=$(wc -l <"$tmp/$login")
 
