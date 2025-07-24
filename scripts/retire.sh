@@ -112,7 +112,7 @@ for login in *; do
       trap 'trace git checkout "$mainBranch" && trace git branch -D "$branchName"' exit
       trace git rm "$login"
       trace git commit -m "Automatic retirement of @$login"
-      effect git push -f -u git@github.com:"$ORG"/"$MEMBER_REPO" "$branchName"
+      effect git push -f -u origin "$branchName"
       {
         echo "This is an automated PR to retire @$login as a Nixpkgs committers due to not using their commit access for 1 year."
         echo ""
