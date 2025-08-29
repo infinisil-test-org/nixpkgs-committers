@@ -10,16 +10,16 @@ ORG=${1:-$(usage)}
 TEAM=${2:-$(usage)}
 DIR=${3:-$(usage)}
 
-shopt -s nullglob
-
-mkdir -p "$DIR"
-cd "$DIR"
-
-for login in *; do
-  rm "$login"
-done
+mkdir -p "$DIR.new"
 
 gh api /orgs/"$ORG"/teams/"$TEAM"/members --paginate --jq '.[].login' |
   while read -r login; do
-    touch "$login"
+    if [[ -f "$DIR/$login" ]]; then
+      mv "$DIR/$login" "$DIR.new"
+    else
+      date +%F > "$DIR.new/$login"
+    fi
   done
+
+rm -rf "$DIR"
+mv "$DIR.new" "$DIR"
