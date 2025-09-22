@@ -45,7 +45,7 @@ effect gh api \
   --method POST \
   "/repos/$REPOSITORY/issues/$ANNOUNCEMENT_ISSUE_NUMBER/comments" \
   -F "body=@-" << EOF
-The user @$nomineeHandle has been nominated. Endorsements and discussions should be held in the corresponding nomination PR: #$PR_NUMBER
+The user \`@$nomineeHandle\` has been nominated. Endorsements and discussions should be held in the corresponding nomination PR: #$PR_NUMBER
 EOF
 
 effect gh api \

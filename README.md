@@ -16,7 +16,7 @@ To nominate yourself or somebody else:
 1. Click on "Commit changes..." and follow the steps to create a PR.
 1. State your motivation for the nomination in the PR description.
 
-Such nominations are also automatically announced in [this issue](/../../issues/35), which you can subscribe to for updates.
+Such nominations are also automatically announced in [this issue](/../../issues/30), which you can subscribe to for updates.
 
 ## Semi-automatic synchronisation
 
