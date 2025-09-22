@@ -71,7 +71,7 @@ The following sequence tests all code paths:
    ```
 
    Check that no PR would be opened.
-2. Run the script with the `empty` repo argument to simulate CI running with inactive users:
+1. Run the script with the `empty` repo argument to simulate CI running with inactive users:
 
    ```bash
    scripts/retire.sh infinisil-test-org empty nixpkgs-committers members 'yesterday 1 month ago'
@@ -85,22 +85,22 @@ The following sequence tests all code paths:
 
    Check that it created the PR appropriately.
    You can undo this step by closing the PR.
-3. Run it again to simulate CI running again later:
+1. Run it again to simulate CI running again later:
    ```bash
    PROD=1 scripts/retire.sh infinisil-test-org empty nixpkgs-committers members 'yesterday 1 month ago'
    ```
    Check that no other PR is opened.
-4. Run it again with `now` as the date to simulate the time interval passing:
+1. Run it again with `now` as the date to simulate the time interval passing:
    ```bash
    PROD=1 scripts/retire.sh infinisil-test-org empty nixpkgs-committers members now
    ```
    Check that it undrafted the previous PR and posted an appropriate comment.
-5. Run it again to simulate CI running again later:
+1. Run it again to simulate CI running again later:
    ```bash
    PROD=1 scripts/retire.sh infinisil-test-org empty nixpkgs-committers members now
    ```
-6. Reset by marking the PR as a draft again.
-7. Run it again with the `active` repo argument to simulate activity during the time interval:
+1. Reset by marking the PR as a draft again.
+1. Run it again with the `active` repo argument to simulate activity during the time interval:
    ```bash
    PROD=1 scripts/retire.sh infinisil-test-org active nixpkgs-committers members now
    ```
