@@ -10,12 +10,12 @@ maintain the member list in this repository.
 ## Nominations
 
 To nominate yourself or somebody else:
-1. Create an empty `members/<GITHUB_HANDLE>` file ([direct GitHub link](/../new/test-infinisil/members?filename=%3CGITHUB_HANDLE%3E))
+1. Create an empty `members/<GITHUB_HANDLE>` file ([direct GitHub link](/../../new/main/members?filename=%3CGITHUB_HANDLE%3E))
 2. Create a PR with the change with the motivation in the PR description
 
 Such nominations are also automatically announced in [this issue](https://github.com/NixOS/nixpkgs/issues/321665), which you can subscribe to for updates.
 
-You can see all current nominations [here](/../issues?q=state%3Aopen%20label%3Anomination)
+You can see all current nominations [here](/../../issues?q=state%3Aopen%20label%3Anomination)
 
 ## Semi-automatic synchronisation
 
