@@ -1,0 +1,24 @@
+name: Announce nominations
+
+on:
+  pull_request_target:
+    types:
+      - labeled
+
+permissions:
+  issues: write
+
+jobs:
+  announce:
+    name: announce
+    runs-on: ubuntu-latest
+    # Don't run in forks, and only on the nomination label
+    if: ${{ (github.repository_owner == 'NixOS' || github.repository_owner == 'infinisil-test-org') && event.label.name == 'nomination' }}
+    steps:
+      - name: Create announcement comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          repository: ${{ github.repository_owner == 'NixOS' && 'NixOS/nixpkgs' || 'infinisil-test-org/nixpkgs' }}
+          issue-number: ${{ github.repository_owner == 'NixOS' && 3216650000 || 45 }}
+          body: |
+            The user @{{ user }} has been nominated for Nixpkgs commit access. Endorsements and discussions should be held in the nomination PR: <link>
