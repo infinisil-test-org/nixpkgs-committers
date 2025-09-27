@@ -163,7 +163,7 @@ for login in *; do
       trace git rm "$login"
       trace git commit -m "Automatic retirement of @$login"
       effect git push -f -u origin "$branchName"
-      {
+      prNumber=$({
         echo "This is an automated PR to retire @$login as a Nixpkgs committers due to not using their commit access for 1 year."
         echo ""
         echo "Make a comment with your motivation to keep commit access, otherwise this PR will be merged and implemented in 1 month."
@@ -178,7 +178,14 @@ for login in *; do
          -F "body=@-" \
          -f "head=$ORG:$branchName" \
          -f "base=$mainBranch" \
-         -F "draft=true" >/dev/null
+         -F "draft=true" \
+         --jq .number
+      )
+
+      effect gh api \
+        --method POST \
+        /repos/"$ORG"/"$MEMBER_REPO"/issues/"$prNumber"/labels \
+        -f "labels[]=retirement" >/dev/null
     )
   else
     log "$login is active with $activityCount activities"
