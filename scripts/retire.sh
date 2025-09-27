@@ -47,8 +47,8 @@ newCutoff=$(date --date="1 year ago" +%s)
 #
 # | commit bit reception date  | file creation date | file contents  |
 # | -------------------------- | ------------------ | -------------- |
-# | A)         -∞ - 2024-10-06 | 2025-07-08         | empty          |
-# | B) 2024-10-07 - 2025-04-22 | 2025-07-08         | reception date |
+# | A)         -∞ - 2024-10-06 | 2025-07-16         | empty          |
+# | B) 2024-10-07 - 2025-04-22 | 2025-07-16         | reception date |
 # | C) 2025-08-13 - ∞          | reception date     | empty          |
 #
 # After 2026-04-23 (one year after C started), the file creation date
@@ -58,7 +58,7 @@ newCutoff=$(date --date="1 year ago" +%s)
 # check if the file creation date is in the last year.
 #
 # For now however, the code needs to check if the file creation date
-# is before 2025-07-09 to distinguish between periods A and C,
+# is before 2025-07-17 to distinguish between periods A and C,
 # so we hardcode that date for the code to use.
 createdOnReceptionEpoch=$(date --date=2025-07-17 +%s)
 
