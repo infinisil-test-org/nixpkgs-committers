@@ -83,7 +83,7 @@ The following sequence tests all code paths:
    PROD=1 scripts/retire.sh infinisil-test-org empty nixpkgs-committers members 'yesterday 1 month ago'
    ```
 
-   Check that it created the PR appropriately.
+   Check that it created the PR appropriately, including assigning the "retirement" label.
    You can undo this step by closing the PR.
 3. Run it again to simulate CI running again later:
    ```bash
