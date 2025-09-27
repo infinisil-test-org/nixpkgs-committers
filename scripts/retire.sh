@@ -60,7 +60,7 @@ newCutoff=$(date --date="1 year ago" +%s)
 # For now however, the code needs to check if the file creation date
 # is before 2025-07-09 to distinguish between periods A and C,
 # so we hardcode that date for the code to use.
-createdOnReceptionEpoch=$(date --date=2025-07-09 +%s)
+createdOnReceptionEpoch=$(date --date=2025-07-17 +%s)
 
 if [[ -z "${PROD:-}" ]]; then
   tmp=$(git rev-parse --show-toplevel)/.tmp
