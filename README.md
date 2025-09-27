@@ -40,7 +40,7 @@ an automated comment will be posted with the next steps for the Nixpkgs commit d
 
 Automation depends on a GitHub App with the following permissions:
 - Organisation: Members read only (to be able to read the team members)
-- Repository: Pull requests read write, Contents read write (to be able to create PRs in this repository)
+- Repository: Issues read write, Pull requests read write, Contents read write (to be able to create issue comments and PRs in this repository)
 
 The GitHub App should only be installed on this repository.
 To give the workflows access to the GitHub App:

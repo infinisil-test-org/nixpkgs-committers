@@ -16,6 +16,22 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ ! contains(github.event.pull_request.labels.*.name, 'nomination') && github.event.pull_request.head.ref != 'create-pull-request/sync' }}
     steps:
+      - uses: actions/create-github-app-token@v2
+        id: app-token
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.PRIVATE_KEY }}
+      - name: Get GitHub App User Git String
+        id: user
+        run: |
+          userId=$(gh api "/users/${{ steps.app-token.outputs.app-slug }}[bot]" --jq .id)
+          name="${{ steps.app-token.outputs.app-slug }}[bot]"
+          email="$userId+${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git config --global user.name "$name"
+          git config --global user.email "$email"
+          echo "git-string=$name <$email>" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
       - name: Fetch source
         uses: actions/checkout@v4
       - name: Process nomination
@@ -29,9 +45,9 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           ANNOUNCEMENT_ISSUE_NUMBER: "${{
-              github.repository_owner == 'NixOS' && 999999 ||
+              github.repository_owner == 'NixOS' && 35 ||
               github.repository_owner == 'infinisil-test-org' && 30 ||
               'NO_ISSUE_NUMBER'
             }}"
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
           PROD: "1"
