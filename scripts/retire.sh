@@ -124,7 +124,7 @@ for login in *; do
   if [[ -n "$prInfo" ]]; then
     # If there is a PR already
     prNumber=$(jq .number <<< "$prInfo")
-    epochCreatedAt=$(date --date="$(jq -r .created_at <<< "$prInfo")" +%s)
+    epochCreatedAt=$(jq '.created_at | fromdateiso8601' <<< "$prInfo")
     if jq -e .draft <<< "$prInfo" >/dev/null && (( epochCreatedAt < noticeCutoff )); then
       log "$login has a retirement PR due, unmarking PR as draft and commenting with next steps"
       effect gh pr ready --repo "$ORG/$MEMBER_REPO" "$prNumber"
